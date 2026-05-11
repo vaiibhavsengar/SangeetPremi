@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SangitPremi - Premium Music Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #007AFF;
+            --bg-color: #f5f5f7;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --shadow: 0 20px 40px rgba(0,0,0,0.1);
+            --blur: blur(20px);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: rgba(28, 28, 30, 0.7);
+            --text-main: #f5f5f7;
+            --text-sub: #86868b;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        /* Dynamic Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(80px);
+            transition: var(--transition);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            flex-grow: 1;
+        }
+
+        .btn-icon {
+            background: var(--card-bg);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            backdrop-filter: var(--blur);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            color: var(--text-main);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.9);
+        }
+
+        /* Player Card */
+        .player-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            border-radius: 35px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .album-art-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .album-art {
+            width: 100%;
+            height: 100%;
+            border-radius: 25px;
+            object-fit: cover;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .album-art.playing {
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .song-info {
+            margin-bottom: 25px;
+        }
+
+        .song-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .artist-name {
+            font-size: 1rem;
+            color: var(--text-sub);
+            font-weight: 400;
+        }
+
+        /* Equalizer */
+        .equalizer {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            height: 20px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .equalizer.active {
+            opacity: 1;
+        }
+
+        .bar {
+            width: 3px;
+            background: var(--accent);
+            border-radius: 10px;
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { height: 5px; }
+            to { height: 20px; }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .progress-bar {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .btn-ctrl {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-play {
+            width: 65px;
+            height: 65px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-play:active {
+            transform: scale(0.9);
+        }
+
+        .btn-fav.active {
+            color: #ff3b30;
+        }
+
+        /* Volume */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-sub);
+            margin-top: 10px;
+        }
+
+        .volume-slider {
+            flex-grow: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        [data-theme="dark"] .volume-slider {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--text-main);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Playlist */
+        .playlist-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: none;
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-family: inherit;
+            outline: none;
+            box-shadow: var(--shadow);
+        }
+
+        .song-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .song-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .song-list::-webkit-scrollbar-thumb {
+            background: var(--text-sub);
+            border-radius: 10px;
+        }
+
+        .song-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .song-item:hover, .song-item.active {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+        }
+
+        .song-item-thumb {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .song-item-info {
+            flex-grow: 1;
+        }
+
+        .song-item-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .song-item-artist {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* Lyrics Section */
+        .lyrics-toggle {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .lyrics-content {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        /* Mini Player Mode */
+        .container.mini {
+            max-width: 350px;
+        }
+
+        .mini .album-art-container {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 0;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .mini .player-card {
+            padding: 15px 15px 15px 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+
+        .mini .song-info {
+            margin-bottom: 10px;
+        }
+
+        .mini .song-title { font-size: 1rem; }
+        .mini .artist-name { font-size: 0.8rem; }
+        .mini .controls, .mini .volume-container, .mini .playlist-section, .mini .equalizer { display: none; }
+        .mini .mini-controls { display: flex !important; gap: 15px; align-items: center; }
+
+        .mini-controls { display: none; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .player-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient" id="bg-gradient"></div>
+
+    <div class="container" id="main-container">
+        <header>
+            <button class="btn-icon" id="mini-toggle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+            <h1 class="logo">SangitPremi</h1>
+            <button class="btn-icon" id="theme-toggle">
+                <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+        </header>
+
+        <div class="player-card">
+            <div class="album-art-container">
+                <img src="" alt="Album Art" class="album-art" id="album-art">
+            </div>
+
+            <div class="song-info">
+                <h2 class="song-title" id="song-title">Song Title</h2>
+                <p class="artist-name" id="artist-name">Artist Name</p>
+            </div>
+
+            <div class="equalizer" id="equalizer">
+                <div class="bar" style="animation-delay: -0.5s"></div>
+                <div class="bar" style="animation-delay: -0.2s"></div>
+                <div class="bar" style="animation-delay: -0.7s"></div>
+                <div class="bar" style="animation-delay: -0.1s"></div>
+                <div class="bar" style="animation-delay: -0.4s"></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="time-info">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-ctrl" id="shuffle-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                </button>
+                <button class="btn-ctrl" id="prev-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg>
+                </button>
+                <button class="btn-ctrl btn-play" id="play-btn">
+                    <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="btn-ctrl" id="next-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+                </button>
+                <button class="btn-ctrl" id="repeat-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                </button>
+            </div>
+
+            <div class="mini-controls" id="mini-controls">
+                <button class="btn-ctrl" id="mini-play-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            </div>
+
+            <button class="btn-ctrl btn-fav" id="fav-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+
+            <div class="volume-container">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
+            </div>
+        </div>
+
+        <div class="lyrics-toggle" id="lyrics-toggle">Show Lyrics</div>
+        <div class="lyrics-content" id="lyrics-content">
+            Lyrics will appear here...
+        </div>
+
+        <div class="playlist-section">
+            <input type="text" class="search-box" id="search-box" placeholder="Search songs...">
+            <div class="song-list" id="song-list">
+                <!-- Song items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-simple-mouse-click-608.mp3"></audio>
+
+    <script>
+        // Song Database
+        const songs = [
+            {
+                title: "Midnight City",
+                artist: "M83",
+                cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&h=400&fit=crop",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                color: "linear-gradient(45deg, #2c3e50, #000000)",
+                lyrics: "Waiting in a car...\nWaiting for a ride in the dark...\nAt night the city is a world of its own..."
+            },
+            {
+                title: "Blinding Lights",
+                artist: "The Weeknd",
+                cover: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=400&h=400&fit=crop",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                color: "linear-gradient(45deg, #ff0055, #330011)",
+                lyrics: "I've been on my own for long enough...\nMaybe you can show me how to love, maybe..."
+            },
+            {
+                title: "Levitating",
+                artist: "Dua Lipa",
+                cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+                color: "linear-gradient(45deg, #8e44ad, #2c3e50)",
+                lyrics: "If you wanna run away with me, I know a galaxy...\nAnd I can take you for a ride..."
+            },
+            {
+                title: "Stay",
+                artist: "Kid LAROI & Justin Bieber",
+                cover: "https://images.unsplash.com/photo-1459749411177-042180ce673c?w=400&h=400&fit=crop",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+                color: "linear-gradient(45deg, #f1c40f, #e67e22)",
+                lyrics: "I do the same thing I told you that I never would...\nI told you I'd change, even when I knew I never could..."
+            },
+            {
+                title: "Peaches",
+                artist: "Justin Bieber",
+                cover: "https://images.unsplash.com/photo-1514525253361-bee8718a74a2?w=400&h=400&fit=crop",
+                src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+                color: "linear-gradient(45deg, #e74c3c, #c0392b)",
+                lyrics: "I got my peaches out in Georgia (oh, yeah, shit)...\nI get my weed from California (that's that shit)..."
+            }
+        ];
+
+        // State
+        let currentIdx = parseInt(localStorage.getItem('lastPlayedIdx')) || 0;
+        let isPlaying = false;
+        let isShuffle = false;
+        let isRepeat = false;
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        // DOM Elements
+        const audio = document.getElementById('audio-player');
+        const clickSound = document.getElementById('click-sound');
+        const albumArt = document.getElementById('album-art');
+        const songTitle = document.getElementById('song-title');
+        const artistName = document.getElementById('artist-name');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const progressFill = document.getElementById('progress-fill');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const songList = document.getElementById('song-list');
+        const bgGradient = document.getElementById('bg-gradient');
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const equalizer = document.getElementById('equalizer');
+        const favBtn = document.getElementById('fav-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const searchBox = document.getElementById('search-box');
+        const miniToggle = document.getElementById('mini-toggle');
+        const mainContainer = document.getElementById('main-container');
+        const lyricsToggle = document.getElementById('lyrics-toggle');
+        const lyricsContent = document.getElementById('lyrics-content');
+
+        // Initialization
+        function init() {
+            loadSong(currentIdx);
+            renderPlaylist();
+            
+            // Check theme
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+
+            // Restore last position
+            const lastPos = localStorage.getItem('lastPosition');
+            if (lastPos) audio.currentTime = parseFloat(lastPos);
+        }
+
+        function loadSong(idx) {
+            const song = songs[idx];
+            songTitle.innerText = song.title;
+            artistName.innerText = song.artist;
+            albumArt.src = song.cover;
+            audio.src = song.src;
+            bgGradient.style.background = song.color;
+            lyricsContent.innerText = song.lyrics;
+            
+            // Update favorites UI
+            if (favorites.includes(song.title)) {
+                favBtn.classList.add('active');
+            } else {
+                favBtn.classList.remove('active');
+            }
+
+            localStorage.setItem('lastPlayedIdx', idx);
+            updatePlaylistActiveState();
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pauseSong();
+            } else {
+                playSong();
+            }
+            playClick();
+        }
+
+        function playSong() {
+            isPlaying = true;
+            audio.play();
+            playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            albumArt.classList.add('playing');
+            equalizer.classList.add('active');
+        }
+
+        function pauseSong() {
+            isPlaying = false;
+            audio.pause();
+            playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+            albumArt.classList.remove('playing');
+            equalizer.classList.remove('active');
+        }
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => {});
+        }
+
+        function nextSong() {
+            if (isShuffle) {
+                currentIdx = Math.floor(Math.random() * songs.length);
+            } else {
+                currentIdx = (currentIdx + 1) % songs.length;
+            }
+            loadSong(currentIdx);
+            if (isPlaying) playSong();
+            playClick();
+        }
+
+        function prevSong() {
+            currentIdx = (currentIdx - 1 + songs.length) % songs.length;
+            loadSong(currentIdx);
+            if (isPlaying) playSong();
+            playClick();
+        }
+
+        function updateProgress(e) {
+            const { duration, currentTime } = e.srcElement;
+            const percent = (currentTime / duration) * 100;
+            progressFill.style.width = `${percent}%`;
+            
+            // Update time display
+            currentTimeEl.innerText = formatTime(currentTime);
+            if (duration) durationEl.innerText = formatTime(duration);
+
+            // Save position
+            localStorage.setItem('lastPosition', currentTime);
+        }
+
+        function setProgress(e) {
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+
+        function formatTime(time) {
+            const min = Math.floor(time / 60);
+            const sec = Math.floor(time % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function renderPlaylist(filter = "") {
+            songList.innerHTML = "";
+            songs.forEach((song, idx) => {
+                if (song.title.toLowerCase().includes(filter.toLowerCase()) || 
+                    song.artist.toLowerCase().includes(filter.toLowerCase())) {
+                    
+                    const div = document.createElement('div');
+                    div.className = `song-item ${idx === currentIdx ? 'active' : ''}`;
+                    div.innerHTML = `
+                        <img src="${song.cover}" class="song-item-thumb">
+                        <div class="song-item-info">
+                            <div class="song-item-title">${song.title}</div>
+                            <div class="song-item-artist">${song.artist}</div>
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        currentIdx = idx;
+                        loadSong(idx);
+                        playSong();
+                        playClick();
+                    };
+                    songList.appendChild(div);
+                }
+            });
+        }
+
+        function updatePlaylistActiveState() {
+            const items = document.querySelectorAll('.song-item');
+            items.forEach((item, idx) => {
+                item.classList.remove('active');
+                if (idx === currentIdx) item.classList.add('active');
+            });
+        }
+
+        // Event Listeners
+        playBtn.onclick = togglePlay;
+        document.getElementById('next-btn').onclick = nextSong;
+        document.getElementById('prev-btn').onclick = prevSong;
+        audio.ontimeupdate = updateProgress;
+        progressBar.onclick = setProgress;
+        audio.onended = () => {
+            if (isRepeat) {
+                audio.currentTime = 0;
+                playSong();
+            } else {
+                nextSong();
+            }
+        };
+
+        themeToggle.onclick = () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            playClick();
+        };
+
+        favBtn.onclick = () => {
+            const song = songs[currentIdx];
+            if (favorites.includes(song.title)) {
+                favorites = favorites.filter(f => f !== song.title);
+                favBtn.classList.remove('active');
+            } else {
+                favorites.push(song.title);
+                favBtn.classList.add('active');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            playClick();
+        };
+
+        volumeSlider.oninput = (e) => {
+            audio.volume = e.target.value;
+        };
+
+        shuffleBtn.onclick = () => {
+            isShuffle = !isShuffle;
+            shuffleBtn.style.color = isShuffle ? 'var(--accent)' : 'var(--text-main)';
+            playClick();
+        };
+
+        repeatBtn.onclick = () => {
+            isRepeat = !isRepeat;
+            repeatBtn.style.color = isRepeat ? 'var(--accent)' : 'var(--text-main)';
+            playClick();
+        };
+
+        searchBox.oninput = (e) => {
+            renderPlaylist(e.target.value);
+        };
+
+        miniToggle.onclick = () => {
+            mainContainer.classList.toggle('mini');
+            playClick();
+        };
+
+        lyricsToggle.onclick = () => {
+            const isHidden = lyricsContent.style.display === 'none' || lyricsContent.style.display === '';
+            lyricsContent.style.display = isHidden ? 'block' : 'none';
+            lyricsToggle.innerText = isHidden ? 'Hide Lyrics' : 'Show Lyrics';
+            playClick();
+        };
+
+        // Mobile Gesture (Simple Swipe Simulator)
+        let touchStartX = 0;
+        albumArt.ontouchstart = (e) => touchStartX = e.touches[0].clientX;
+        albumArt.ontouchend = (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            if (touchStartX - touchEndX > 50) nextSong();
+            if (touchEndX - touchStartX > 50) prevSong();
+        };
+
+        init();
+    </script>
+</body>
+</html>
