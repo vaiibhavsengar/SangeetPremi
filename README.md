@@ -1,4 +1,4 @@
-# 🎵 SangitPremi - Music Player
+# 🎵 Music Player
 
 **SangitPremi** is a lightweight and user-friendly music player built using **HTML, CSS, and JavaScript**. It allows users to enjoy a curated collection of songs with a simple and elegant interface.
 
